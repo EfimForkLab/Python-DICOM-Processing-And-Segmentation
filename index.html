@@ -7538,51 +7538,7 @@ a.anchor-link {
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<div id="plotly-3d-widget"></div>
-</div>
-</div>
-</div>
-</div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
-<div class="jp-Cell-inputWrapper" tabindex="0">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
-</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
 <p>This code is designed to load, process, and visualize DICOM image data, typically used in medical imaging. It reads DICOM files, converts the raw voxel values to Hounsfield Units (HU) to represent tissue densities accurately, and saves the processed data in a .npy file for efficient reuse. The code also includes functionality to load these saved files and visualize the distribution of HU values through histograms, aiding in the analysis of the tissue structures within the scanned images. This way, we can thoroughly study the internal anatomy of patients, providing detailed insights into their body structures.</p>
-</div>
-</div>
-</div>
-</div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
-<div class="jp-Cell-inputWrapper" tabindex="0">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
-</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<h3 id="Setting-Up-Your-Environment-with-Miniconda">Setting Up Your Environment with Miniconda<a class="anchor-link" href="#Setting-Up-Your-Environment-with-Miniconda">¶</a></h3><h4 id="Step-1:-Install-Miniconda">Step 1: Install Miniconda<a class="anchor-link" href="#Step-1:-Install-Miniconda">¶</a></h4><p>If you haven't installed Miniconda yet, you can download it from the <a href="https://docs.conda.io/en/latest/miniconda.html">official Miniconda website</a>.</p>
-<h4 id="Step-2:-Create-a-New-Conda-Environment">Step 2: Create a New Conda Environment<a class="anchor-link" href="#Step-2:-Create-a-New-Conda-Environment">¶</a></h4><p>Creating a new environment is optional but recommended to keep your dependencies organized.</p>
-<div class="highlight"><pre><span></span>conda<span class="w"> </span>create<span class="w"> </span>--name<span class="w"> </span>myenv<span class="w"> </span><span class="nv">python</span><span class="o">=</span><span class="m">3</span>.8
-</pre></div>
-<p>Replace <code>myenv</code> with your desired environment name and <code>3.8</code> with your preferred Python version.</p>
-<h4 id="Step-3:-Activate-the-Conda-Environment">Step 3: Activate the Conda Environment<a class="anchor-link" href="#Step-3:-Activate-the-Conda-Environment">¶</a></h4><p>Activate the environment you just created:</p>
-<div class="highlight"><pre><span></span>conda<span class="w"> </span>activate<span class="w"> </span>myenv
-</pre></div>
-<h4 id="Step-4:-Install-Necessary-Libraries">Step 4: Install Necessary Libraries<a class="anchor-link" href="#Step-4:-Install-Necessary-Libraries">¶</a></h4><p>Install all required libraries using the following command:</p>
-<pre><code>conda install -c conda-forge pydicom matplotlib numpy ipywidgets scipy scikit-image scikit-learn plotly
-</code></pre>
-<p>This command installs the following libraries:</p>
-<ul>
-<li>pydicom: For working with DICOM files.</li>
-<li>matplotlib: For plotting and visualization.</li>
-<li>numpy: For numerical operations.</li>
-<li>ipywidgets: For interactive widgets in Jupyter Notebooks.</li>
-<li>scipy: For scientific and technical computing.</li>
-<li>scikit-image: For image processing.</li>
-<li>scikit-learn: For machine learning.</li>
-<li>plotly: For interactive plotting.</li>
-</ul>
-<h4 id="Step-5:-You-may-still-have-to-further-configure-your-project-depending-on-your-operating-system">Step 5: You may still have to further configure your project depending on your operating system<a class="anchor-link" href="#Step-5:-You-may-still-have-to-further-configure-your-project-depending-on-your-operating-system">¶</a></h4>
 </div>
 </div>
 </div>
@@ -7591,7 +7547,7 @@ a.anchor-link {
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [2]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In [13]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
 <div class="highlight hl-ipython3"><pre><span></span><span class="c1"># Plots werden inline im Notebook angezeigt</span>
@@ -7617,7 +7573,7 @@ a.anchor-link {
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [3]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In [14]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
 <div class="highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn">pydicom</span> <span class="kn">import</span> <span class="n">dcmread</span>
@@ -7687,7 +7643,7 @@ a.anchor-link {
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [4]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In [15]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
 <div class="highlight hl-ipython3"><pre><span></span><span class="n">data_path</span> <span class="o">=</span> <span class="s2">"Head/"</span>
@@ -7714,7 +7670,7 @@ a.anchor-link {
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [5]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In [16]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
 <div class="highlight hl-ipython3"><pre><span></span><span class="c1"># Display DICOM image with patient information.</span>
@@ -7890,7 +7846,7 @@ a.anchor-link {
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [6]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In [17]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
 <div class="highlight hl-ipython3"><pre><span></span><span class="c1"># Create an interactive slider to navigate through DICOM images</span>
@@ -7911,7 +7867,7 @@ a.anchor-link {
 </div>
 </div>
 <div class="jp-OutputArea-child jp-OutputArea-executeResult">
-<div class="jp-OutputPrompt jp-OutputArea-prompt">Out[6]:</div>
+<div class="jp-OutputPrompt jp-OutputArea-prompt">Out[17]:</div>
 <div class="jp-RenderedText jp-OutputArea-output jp-OutputArea-executeResult" data-mime-type="text/plain" tabindex="0">
 <pre>&lt;function __main__.navigation(index)&gt;</pre>
 </div>
@@ -7923,7 +7879,7 @@ a.anchor-link {
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [7]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In [18]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
 <div class="highlight hl-ipython3"><pre><span></span><span class="c1"># Create an interactive slider to navigate and optimize DICOM images</span>
@@ -7961,7 +7917,7 @@ a.anchor-link {
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [8]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In [19]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
 <div class="highlight hl-ipython3"><pre><span></span><span class="c1"># Initialize an empty list to hold the DICOM files</span>
@@ -8036,7 +7992,7 @@ Slice Thickness: 1.0
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [9]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In [20]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
 <div class="highlight hl-ipython3"><pre><span></span><span class="c1"># Set an identifier for the patient data</span>
@@ -8119,7 +8075,7 @@ Fortunately, this is in the DICOM header.</p>
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [10]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In [21]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
 <div class="highlight hl-ipython3"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="s2">"Slice Thickness: </span><span class="si">%f</span><span class="s2">"</span> <span class="o">%</span> <span class="n">patient</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">SliceThickness</span><span class="p">)</span>
@@ -8161,7 +8117,7 @@ Pixel Spacing (row, col): (1.000000, 1.000000)
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [11]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In [22]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
 <div class="highlight hl-ipython3"><pre><span></span><span class="nb">id</span> <span class="o">=</span> <span class="mi">0</span>
@@ -8216,7 +8172,7 @@ Spacing:  [1. 1. 1.]
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [12]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In [23]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
 <div class="highlight hl-ipython3"><pre><span></span><span class="c1"># Load the scans and resample the images</span>
@@ -8253,7 +8209,7 @@ Calculating surface
               'k': array([    0,     0,     2, ..., 99503, 99506, 99504]),
               'opacity': 0.5,
               'type': 'mesh3d',
-              'uid': '8671a196-fe2d-40cc-a248-3bb7fae34b4d',
+              'uid': '32e6c719-ad30-46f4-9c6c-b10ac89cecf7',
               'x': array([177.45454, 178.     , 178.     , ..., 412.     , 412.39816, 412.813  ],
                          dtype=float32),
               'y': array([244.     , 244.     , 243.29941, ..., 275.26035, 272.     , 274.     ],
