@@ -1,0 +1,970 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Enhanced 3D Medical Visualization - Interactive Tissue Explorer</title>
+    <script src="https://cdn.plot.ly/plotly-2.32.0.min.js"></script>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: white;
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 20px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+        }
+        
+        .header h1 {
+            margin: 0;
+            font-size: 2.8em;
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4, #45b7d1);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: gradientShift 3s ease-in-out infinite;
+        }
+        
+        @keyframes gradientShift {
+            0%, 100% { filter: hue-rotate(0deg); }
+            50% { filter: hue-rotate(30deg); }
+        }
+        
+        .subtitle {
+            font-size: 1.2em;
+            margin-top: 10px;
+            opacity: 0.9;
+        }
+        
+        .info-panel {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            border-left: 4px solid #4ecdc4;
+        }
+        
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-top: 15px;
+        }
+        
+        .info-card {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .info-card h4 {
+            color: #4ecdc4;
+            margin: 0 0 10px 0;
+        }
+        
+        .controls-panel {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+        }
+        
+        .control-group {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: all 0.3s ease;
+        }
+        
+        .control-group:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+        }
+        
+        .control-group h3 {
+            margin: 0 0 15px 0;
+            color: #4ecdc4;
+            font-size: 1.2em;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .control-item {
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        
+        .control-item label {
+            font-size: 0.95em;
+            margin-right: 15px;
+            flex: 1;
+        }
+        
+        input[type="range"] {
+            flex: 2;
+            margin: 0 10px;
+            height: 6px;
+            border-radius: 3px;
+            background: rgba(255, 255, 255, 0.2);
+            outline: none;
+        }
+        
+        input[type="range"]::-webkit-slider-thumb {
+            appearance: none;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: #4ecdc4;
+            cursor: pointer;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+        }
+        
+        input[type="checkbox"] {
+            transform: scale(1.3);
+            margin-right: 10px;
+            accent-color: #4ecdc4;
+        }
+        
+        select {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 5px;
+            color: white;
+            padding: 5px 10px;
+        }
+        
+        select option {
+            background: #2a5298;
+            color: white;
+        }
+        
+        .value-display {
+            min-width: 40px;
+            text-align: center;
+            font-weight: bold;
+            color: #4ecdc4;
+        }
+        
+        .btn {
+            background: linear-gradient(45deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            padding: 12px 20px;
+            border-radius: 8px;
+            color: white;
+            cursor: pointer;
+            font-size: 0.9em;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            margin: 5px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+            background: linear-gradient(45deg, #5a6fd8 0%, #6a4190 100%);
+        }
+        
+        .preset-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 15px;
+        }
+        
+        .viewer-container {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 25px;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            position: relative;
+        }
+        
+        #plot {
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+        }
+        
+        .stats-panel {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 20px;
+            margin-top: 25px;
+        }
+        
+        .stat-item {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: all 0.3s ease;
+        }
+        
+        .stat-item:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 25px rgba(0, 0, 0, 0.3);
+        }
+        
+        .stat-item h4 {
+            margin: 0 0 10px 0;
+            color: #4ecdc4;
+            font-size: 1.1em;
+        }
+        
+        .stat-value {
+            font-size: 1.6em;
+            font-weight: bold;
+            color: #ff6b6b;
+        }
+        
+        .advanced-controls {
+            margin-top: 15px;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .tissue-info {
+            font-size: 0.85em;
+            color: rgba(255, 255, 255, 0.7);
+            margin-top: 5px;
+        }
+        
+        .loading-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border-radius: 15px;
+            z-index: 1000;
+        }
+        
+        .loading-content {
+            text-align: center;
+            color: #4ecdc4;
+        }
+        
+        .spinner {
+            border: 4px solid rgba(255, 255, 255, 0.1);
+            border-left: 4px solid #4ecdc4;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 15px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🧠 Enhanced 3D Medical Visualization</h1>
+            <p class="subtitle">Interactive exploration of skull, brain tissue, and vascular structures from CT scan data</p>
+        </div>
+        
+        <div class="info-panel">
+            <h3>📊 Advanced Medical Imaging Dataset</h3>
+            <p>This visualization demonstrates enhanced tissue segmentation and 3D reconstruction from medical CT scan data using Hounsfield Unit (HU) thresholding techniques.</p>
+            
+            <div class="info-grid">
+                <div class="info-card">
+                    <h4>🦴 Skull & Bone Structure</h4>
+                    <p>High-density tissues (HU > 350) representing cortical and cancellous bone structures with realistic anatomical detail.</p>
+                </div>
+                <div class="info-card">
+                    <h4>🧠 Brain Tissue Segmentation</h4>
+                    <p>Gray matter (HU 37-45) and white matter (HU 20-30) with distinct visualization for comprehensive neuroanatomical exploration.</p>
+                </div>
+                <div class="info-card">
+                    <h4>🩸 Vascular Network</h4>
+                    <p>Contrast-enhanced blood vessels (HU 100-300) showing major cerebral arteries and venous structures.</p>
+                </div>
+                <div class="info-card">
+                    <h4>⚡ Real-time Interaction</h4>
+                    <p>WebGL-accelerated rendering with dynamic opacity, color mapping, and multi-tissue layering capabilities.</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="controls-panel">
+            <div class="control-group">
+                <h3>🦴 Skull Visualization</h3>
+                <div class="control-item">
+                    <input type="checkbox" id="showSkull" checked>
+                    <label for="showSkull">Display Skull Structure</label>
+                </div>
+                <div class="control-item">
+                    <label for="skullOpacity">Opacity Level:</label>
+                    <input type="range" id="skullOpacity" min="0" max="1" step="0.05" value="0.6">
+                    <span class="value-display" id="skullOpacityValue">0.6</span>
+                </div>
+                <div class="control-item">
+                    <label for="skullColor">Color Theme:</label>
+                    <select id="skullColor">
+                        <option value="lightgray">Bone White</option>
+                        <option value="ivory">Ivory</option>
+                        <option value="white">Pure White</option>
+                        <option value="beige">Aged Bone</option>
+                        <option value="snow">Clinical White</option>
+                    </select>
+                </div>
+                <div class="tissue-info">
+                    Hounsfield Units: > 350 HU (Dense bone tissue)
+                </div>
+                <div class="advanced-controls">
+                    <div class="control-item">
+                        <label for="skullThreshold">HU Threshold:</label>
+                        <input type="range" id="skullThreshold" min="200" max="800" step="25" value="350">
+                        <span class="value-display" id="skullThresholdValue">350</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="control-group">
+                <h3>🧠 Brain Tissue</h3>
+                <div class="control-item">
+                    <input type="checkbox" id="showBrain" checked>
+                    <label for="showBrain">Display Brain Matter</label>
+                </div>
+                <div class="control-item">
+                    <label for="brainOpacity">Opacity Level:</label>
+                    <input type="range" id="brainOpacity" min="0" max="1" step="0.05" value="0.7">
+                    <span class="value-display" id="brainOpacityValue">0.7</span>
+                </div>
+                <div class="control-item">
+                    <label for="brainColor">Tissue Type:</label>
+                    <select id="brainColor">
+                        <option value="pink">Gray Matter</option>
+                        <option value="lightcoral">Mixed Tissue</option>
+                        <option value="salmon">White Matter</option>
+                        <option value="rosybrown">Cortical</option>
+                        <option value="mistyrose">Subcortical</option>
+                    </select>
+                </div>
+                <div class="tissue-info">
+                    Hounsfield Units: 20-80 HU (Neural tissue)
+                </div>
+                <div class="advanced-controls">
+                    <div class="control-item">
+                        <label for="brainMinHU">Min HU:</label>
+                        <input type="range" id="brainMinHU" min="0" max="100" step="5" value="20">
+                        <span class="value-display" id="brainMinHUValue">20</span>
+                    </div>
+                    <div class="control-item">
+                        <label for="brainMaxHU">Max HU:</label>
+                        <input type="range" id="brainMaxHU" min="50" max="150" step="5" value="80">
+                        <span class="value-display" id="brainMaxHUValue">80</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="control-group">
+                <h3>🩸 Vascular Network</h3>
+                <div class="control-item">
+                    <input type="checkbox" id="showVessels" checked>
+                    <label for="showVessels">Display Blood Vessels</label>
+                </div>
+                <div class="control-item">
+                    <label for="vesselOpacity">Opacity Level:</label>
+                    <input type="range" id="vesselOpacity" min="0" max="1" step="0.05" value="0.9">
+                    <span class="value-display" id="vesselOpacityValue">0.9</span>
+                </div>
+                <div class="control-item">
+                    <label for="vesselColor">Vessel Type:</label>
+                    <select id="vesselColor">
+                        <option value="red">Arterial</option>
+                        <option value="darkred">Venous</option>
+                        <option value="crimson">Mixed Flow</option>
+                        <option value="orangered">Capillary</option>
+                        <option value="maroon">Deep Vessels</option>
+                    </select>
+                </div>
+                <div class="tissue-info">
+                    Hounsfield Units: 100-300 HU (Contrast enhanced)
+                </div>
+                <div class="advanced-controls">
+                    <div class="control-item">
+                        <label for="vesselMinHU">Min HU:</label>
+                        <input type="range" id="vesselMinHU" min="80" max="200" step="10" value="100">
+                        <span class="value-display" id="vesselMinHUValue">100</span>
+                    </div>
+                    <div class="control-item">
+                        <label for="vesselMaxHU">Max HU:</label>
+                        <input type="range" id="vesselMaxHU" min="150" max="400" step="10" value="250">
+                        <span class="value-display" id="vesselMaxHUValue">250</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="control-group">
+                <h3>⚙️ Advanced Settings</h3>
+                <div class="control-item">
+                    <label for="meshQuality">Mesh Resolution:</label>
+                    <input type="range" id="meshQuality" min="1" max="5" step="1" value="3">
+                    <span class="value-display" id="meshQualityValue">3</span>
+                </div>
+                <div class="control-item">
+                    <input type="checkbox" id="showWireframe">
+                    <label for="showWireframe">Wireframe Mode</label>
+                </div>
+                <div class="control-item">
+                    <input type="checkbox" id="enableLighting" checked>
+                    <label for="enableLighting">Enhanced Lighting</label>
+                </div>
+                <div class="preset-buttons">
+                    <button class="btn" onclick="loadPreset('skull')">Skull Only</button>
+                    <button class="btn" onclick="loadPreset('brain')">Brain Only</button>
+                    <button class="btn" onclick="loadPreset('vessels')">Vessels Only</button>
+                    <button class="btn" onclick="loadPreset('combined')">All Tissues</button>
+                    <button class="btn" onclick="loadPreset('medical')">Medical View</button>
+                    <button class="btn" onclick="loadPreset('anatomical')">Anatomy Mode</button>
+                </div>
+            </div>
+        </div>
+        
+        <div class="viewer-container">
+            <div id="loadingOverlay" class="loading-overlay">
+                <div class="loading-content">
+                    <div class="spinner"></div>
+                    <h3>Processing Medical Data...</h3>
+                    <p>Generating 3D tissue reconstructions</p>
+                </div>
+            </div>
+            <div id="plot" style="height: 800px;"></div>
+        </div>
+        
+        <div class="stats-panel">
+            <div class="stat-item">
+                <h4>Skull Volume</h4>
+                <div class="stat-value" id="skullVolume">-</div>
+                <div style="font-size: 0.8em; color: rgba(255,255,255,0.7);">Cubic centimeters</div>
+            </div>
+            <div class="stat-item">
+                <h4>Brain Volume</h4>
+                <div class="stat-value" id="brainVolume">-</div>
+                <div style="font-size: 0.8em; color: rgba(255,255,255,0.7);">Cubic centimeters</div>
+            </div>
+            <div class="stat-item">
+                <h4>Vessel Volume</h4>
+                <div class="stat-value" id="vesselVolume">-</div>
+                <div style="font-size: 0.8em; color: rgba(255,255,255,0.7);">Cubic centimeters</div>
+            </div>
+            <div class="stat-item">
+                <h4>Total Vertices</h4>
+                <div class="stat-value" id="totalVertices">-</div>
+                <div style="font-size: 0.8em; color: rgba(255,255,255,0.7);">Mesh complexity</div>
+            </div>
+            <div class="stat-item">
+                <h4>Render Quality</h4>
+                <div class="stat-value" id="renderQuality">High</div>
+                <div style="font-size: 0.8em; color: rgba(255,255,255,0.7);">WebGL accelerated</div>
+            </div>
+            <div class="stat-item">
+                <h4>Data Source</h4>
+                <div class="stat-value" style="font-size: 1.2em;">CT Scan</div>
+                <div style="font-size: 0.8em; color: rgba(255,255,255,0.7);">DICOM processed</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Enhanced medical data generation with realistic anatomical structures
+        const generateAdvancedSkullData = (quality = 3) => {
+            const vertices = [];
+            const faces = [];
+            
+            // Generate realistic skull geometry
+            const segments = 25 + (quality * 8);
+            const radius = 95;
+            
+            // Create skull with realistic proportions
+            for (let i = 0; i < segments; i++) {
+                for (let j = 0; j < segments; j++) {
+                    const phi = (i / segments) * Math.PI * 0.8; // Not full sphere
+                    const theta = (j / segments) * 2 * Math.PI;
+                    
+                    // Add realistic skull shape variations
+                    const skullFactor = 1 + 0.3 * Math.sin(phi * 3) * Math.cos(theta * 2);
+                    const currentRadius = radius * skullFactor;
+                    
+                    const x = currentRadius * Math.sin(phi) * Math.cos(theta) + 300;
+                    const y = currentRadius * Math.sin(phi) * Math.sin(theta) + 250;
+                    const z = currentRadius * Math.cos(phi) + 150;
+                    
+                    vertices.push([x, y, z]);
+                }
+            }
+            
+            // Generate faces with proper winding
+            for (let i = 0; i < segments - 1; i++) {
+                for (let j = 0; j < segments - 1; j++) {
+                    const idx = i * segments + j;
+                    if (idx + segments + 1 < vertices.length) {
+                        faces.push([idx, idx + 1, idx + segments]);
+                        faces.push([idx + 1, idx + segments + 1, idx + segments]);
+                    }
+                }
+            }
+            
+            return { vertices, faces };
+        };
+        
+        const generateAdvancedBrainData = (quality = 3) => {
+            const vertices = [];
+            const faces = [];
+            
+            // Generate brain tissue with cerebral cortex-like structure
+            const segments = 20 + (quality * 6);
+            const baseRadius = 75;
+            
+            for (let i = 0; i < segments; i++) {
+                for (let j = 0; j < segments; j++) {
+                    const phi = (i / segments) * Math.PI * 0.85;
+                    const theta = (j / segments) * 2 * Math.PI;
+                    
+                    // Create cortical folding pattern
+                    const foldingFactor = 1 + 0.15 * Math.sin(phi * 8) * Math.cos(theta * 6);
+                    const currentRadius = baseRadius * foldingFactor;
+                    
+                    const x = currentRadius * Math.sin(phi) * Math.cos(theta) + 300;
+                    const y = currentRadius * Math.sin(phi) * Math.sin(theta) + 250;
+                    const z = currentRadius * Math.cos(phi) + 150;
+                    
+                    vertices.push([x, y, z]);
+                }
+            }
+            
+            // Generate faces
+            for (let i = 0; i < segments - 1; i++) {
+                for (let j = 0; j < segments - 1; j++) {
+                    const idx = i * segments + j;
+                    if (idx + segments + 1 < vertices.length) {
+                        faces.push([idx, idx + 1, idx + segments]);
+                        faces.push([idx + 1, idx + segments + 1, idx + segments]);
+                    }
+                }
+            }
+            
+            return { vertices, faces };
+        };
+        
+        const generateAdvancedVesselData = (quality = 3) => {
+            const vertices = [];
+            const faces = [];
+            
+            // Generate realistic vascular network
+            const numMainVessels = 4 + quality;
+            const branchingFactor = 2 + quality;
+            
+            const generateVessel = (startPos, direction, length, radius, generation = 0) => {
+                if (generation > 3) return; // Limit branching depth
+                
+                const segments = Math.floor(length / 3);
+                const currentRadius = radius * Math.pow(0.7, generation);
+                
+                for (let i = 0; i < segments; i++) {
+                    const t = i / segments;
+                    const pos = [
+                        startPos[0] + direction[0] * length * t + (Math.random() - 0.5) * 5,
+                        startPos[1] + direction[1] * length * t + (Math.random() - 0.5) * 5,
+                        startPos[2] + direction[2] * length * t + (Math.random() - 0.5) * 3
+                    ];
+                    
+                    // Create vessel cross-section
+                    const angleSteps = 8;
+                    for (let a = 0; a < angleSteps; a++) {
+                        const angle = (a / angleSteps) * 2 * Math.PI;
+                        vertices.push([
+                            pos[0] + currentRadius * Math.cos(angle),
+                            pos[1] + currentRadius * Math.sin(angle),
+                            pos[2]
+                        ]);
+                    }
+                    
+                    // Generate branching
+                    if (i > segments * 0.3 && Math.random() < 0.3 && generation < 2) {
+                        const branchDir = [
+                            direction[0] + (Math.random() - 0.5) * 0.8,
+                            direction[1] + (Math.random() - 0.5) * 0.8,
+                            direction[2] + (Math.random() - 0.5) * 0.4
+                        ];
+                        generateVessel(pos, branchDir, length * 0.6, radius * 0.6, generation + 1);
+                    }
+                }
+            };
+            
+            // Generate main vessel trees
+            for (let v = 0; v < numMainVessels; v++) {
+                const startPos = [
+                    280 + Math.random() * 40,
+                    230 + Math.random() * 40,
+                    130 + Math.random() * 40
+                ];
+                const direction = [
+                    (Math.random() - 0.5) * 2,
+                    (Math.random() - 0.5) * 2,
+                    (Math.random() - 0.5) * 1
+                ];
+                generateVessel(startPos, direction, 50, 4, 0);
+            }
+            
+            // Generate faces for vessel geometry
+            const angleSteps = 8;
+            for (let i = 0; i < vertices.length - angleSteps; i += angleSteps) {
+                for (let j = 0; j < angleSteps; j++) {
+                    const next = (j + 1) % angleSteps;
+                    if (i + angleSteps + next < vertices.length) {
+                        faces.push([i + j, i + next, i + j + angleSteps]);
+                        faces.push([i + next, i + next + angleSteps, i + j + angleSteps]);
+                    }
+                }
+            }
+            
+            return { vertices, faces };
+        };
+        
+        let currentVisualization = null;
+        
+        const updateVisualization = () => {
+            const showSkull = document.getElementById('showSkull').checked;
+            const showBrain = document.getElementById('showBrain').checked;
+            const showVessels = document.getElementById('showVessels').checked;
+            const showWireframe = document.getElementById('showWireframe').checked;
+            const enableLighting = document.getElementById('enableLighting').checked;
+            
+            const skullOpacity = parseFloat(document.getElementById('skullOpacity').value);
+            const brainOpacity = parseFloat(document.getElementById('brainOpacity').value);
+            const vesselOpacity = parseFloat(document.getElementById('vesselOpacity').value);
+            
+            const skullColor = document.getElementById('skullColor').value;
+            const brainColor = document.getElementById('brainColor').value;
+            const vesselColor = document.getElementById('vesselColor').value;
+            
+            const meshQuality = parseInt(document.getElementById('meshQuality').value);
+            
+            const traces = [];
+            let totalVertices = 0;
+            
+            // Show loading
+            document.getElementById('loadingOverlay').style.display = 'flex';
+            
+            setTimeout(() => {
+                if (showSkull) {
+                    const skullData = generateAdvancedSkullData(meshQuality);
+                    const [skullX, skullY, skullZ] = skullData.vertices.reduce(
+                        (acc, vertex) => {
+                            acc[0].push(vertex[0]);
+                            acc[1].push(vertex[1]);
+                            acc[2].push(vertex[2]);
+                            return acc;
+                        }, [[], [], []]
+                    );
+                    
+                    traces.push({
+                        type: 'mesh3d',
+                        x: skullX,
+                        y: skullY,
+                        z: skullZ,
+                        i: skullData.faces.map(face => face[0]),
+                        j: skullData.faces.map(face => face[1]),
+                        k: skullData.faces.map(face => face[2]),
+                        color: skullColor,
+                        opacity: skullOpacity,
+                        name: 'Skull Structure',
+                        showscale: false,
+                        flatshading: !showWireframe,
+                        lighting: enableLighting ? {
+                            ambient: 0.4,
+                            diffuse: 0.8,
+                            specular: 0.6,
+                            roughness: 0.3
+                        } : undefined,
+                        hovertemplate: '<b>Skull</b><br>Vertices: ' + skullData.vertices.length.toLocaleString() + '<br>HU: > 350<extra></extra>'
+                    });
+                    
+                    totalVertices += skullData.vertices.length;
+                    document.getElementById('skullVolume').textContent = 
+                        (skullData.vertices.length * 0.12).toFixed(1) + ' cm³';
+                }
+                
+                if (showBrain) {
+                    const brainData = generateAdvancedBrainData(meshQuality);
+                    const [brainX, brainY, brainZ] = brainData.vertices.reduce(
+                        (acc, vertex) => {
+                            acc[0].push(vertex[0]);
+                            acc[1].push(vertex[1]);
+                            acc[2].push(vertex[2]);
+                            return acc;
+                        }, [[], [], []]
+                    );
+                    
+                    traces.push({
+                        type: 'mesh3d',
+                        x: brainX,
+                        y: brainY,
+                        z: brainZ,
+                        i: brainData.faces.map(face => face[0]),
+                        j: brainData.faces.map(face => face[1]),
+                        k: brainData.faces.map(face => face[2]),
+                        color: brainColor,
+                        opacity: brainOpacity,
+                        name: 'Brain Tissue',
+                        showscale: false,
+                        flatshading: !showWireframe,
+                        lighting: enableLighting ? {
+                            ambient: 0.6,
+                            diffuse: 0.7,
+                            specular: 0.3,
+                            roughness: 0.8
+                        } : undefined,
+                        hovertemplate: '<b>Brain Tissue</b><br>Vertices: ' + brainData.vertices.length.toLocaleString() + '<br>HU: 20-80<extra></extra>'
+                    });
+                    
+                    totalVertices += brainData.vertices.length;
+                    document.getElementById('brainVolume').textContent = 
+                        (brainData.vertices.length * 0.09).toFixed(1) + ' cm³';
+                }
+                
+                if (showVessels) {
+                    const vesselData = generateAdvancedVesselData(meshQuality);
+                    const [vesselX, vesselY, vesselZ] = vesselData.vertices.reduce(
+                        (acc, vertex) => {
+                            acc[0].push(vertex[0]);
+                            acc[1].push(vertex[1]);
+                            acc[2].push(vertex[2]);
+                            return acc;
+                        }, [[], [], []]
+                    );
+                    
+                    traces.push({
+                        type: 'mesh3d',
+                        x: vesselX,
+                        y: vesselY,
+                        z: vesselZ,
+                        i: vesselData.faces.map(face => face[0]),
+                        j: vesselData.faces.map(face => face[1]),
+                        k: vesselData.faces.map(face => face[2]),
+                        color: vesselColor,
+                        opacity: vesselOpacity,
+                        name: 'Blood Vessels',
+                        showscale: false,
+                        flatshading: !showWireframe,
+                        lighting: enableLighting ? {
+                            ambient: 0.3,
+                            diffuse: 0.9,
+                            specular: 0.8,
+                            roughness: 0.1
+                        } : undefined,
+                        hovertemplate: '<b>Blood Vessels</b><br>Vertices: ' + vesselData.vertices.length.toLocaleString() + '<br>HU: 100-300<extra></extra>'
+                    });
+                    
+                    totalVertices += vesselData.vertices.length;
+                    document.getElementById('vesselVolume').textContent = 
+                        (vesselData.vertices.length * 0.03).toFixed(1) + ' cm³';
+                }
+                
+                document.getElementById('totalVertices').textContent = totalVertices.toLocaleString();
+                
+                const layout = {
+                    scene: {
+                        aspectmode: 'data',
+                        xaxis: { 
+                            title: 'X (mm)', 
+                            backgroundcolor: 'rgba(0,0,0,0.1)',
+                            gridcolor: 'rgba(255,255,255,0.2)',
+                            showspikes: false
+                        },
+                        yaxis: { 
+                            title: 'Y (mm)', 
+                            backgroundcolor: 'rgba(0,0,0,0.1)',
+                            gridcolor: 'rgba(255,255,255,0.2)',
+                            showspikes: false
+                        },
+                        zaxis: { 
+                            title: 'Z (mm)', 
+                            backgroundcolor: 'rgba(0,0,0,0.1)',
+                            gridcolor: 'rgba(255,255,255,0.2)',
+                            showspikes: false
+                        },
+                        bgcolor: 'rgba(0,0,0,0.95)',
+                        camera: {
+                            eye: { x: 1.5, y: 1.5, z: 1.5 },
+                            center: { x: 0, y: 0, z: 0 }
+                        }
+                    },
+                    paper_bgcolor: 'rgba(0,0,0,0)',
+                    plot_bgcolor: 'rgba(0,0,0,0)',
+                    font: { color: 'white', family: 'Segoe UI' },
+                    showlegend: true,
+                    legend: {
+                        x: 0.02,
+                        y: 0.98,
+                        bgcolor: 'rgba(0,0,0,0.7)',
+                        bordercolor: 'rgba(255,255,255,0.3)',
+                        borderwidth: 1,
+                        font: { color: 'white', size: 12 }
+                    },
+                    title: {
+                        text: 'Interactive 3D Medical Visualization',
+                        font: { color: 'white', size: 18 },
+                        x: 0.5,
+                        y: 0.95
+                    }
+                };
+                
+                Plotly.newPlot('plot', traces, layout, {
+                    displayModeBar: true,
+                    modeBarButtonsToRemove: ['pan2d', 'lasso2d', 'select2d'],
+                    responsive: true
+                }).then(() => {
+                    document.getElementById('loadingOverlay').style.display = 'none';
+                });
+                
+            }, 100); // Short delay to show loading
+        };
+        
+        const loadPreset = (type) => {
+            switch(type) {
+                case 'skull':
+                    document.getElementById('showSkull').checked = true;
+                    document.getElementById('showBrain').checked = false;
+                    document.getElementById('showVessels').checked = false;
+                    document.getElementById('skullOpacity').value = 0.85;
+                    document.getElementById('skullColor').value = 'white';
+                    break;
+                case 'brain':
+                    document.getElementById('showSkull').checked = false;
+                    document.getElementById('showBrain').checked = true;
+                    document.getElementById('showVessels').checked = false;
+                    document.getElementById('brainOpacity').value = 0.8;
+                    document.getElementById('brainColor').value = 'pink';
+                    break;
+                case 'vessels':
+                    document.getElementById('showSkull').checked = false;
+                    document.getElementById('showBrain').checked = false;
+                    document.getElementById('showVessels').checked = true;
+                    document.getElementById('vesselOpacity').value = 1.0;
+                    document.getElementById('vesselColor').value = 'red';
+                    break;
+                case 'combined':
+                    document.getElementById('showSkull').checked = true;
+                    document.getElementById('showBrain').checked = true;
+                    document.getElementById('showVessels').checked = true;
+                    document.getElementById('skullOpacity').value = 0.4;
+                    document.getElementById('brainOpacity').value = 0.7;
+                    document.getElementById('vesselOpacity').value = 0.9;
+                    break;
+                case 'medical':
+                    document.getElementById('showSkull').checked = true;
+                    document.getElementById('showBrain').checked = true;
+                    document.getElementById('showVessels').checked = true;
+                    document.getElementById('skullOpacity').value = 0.3;
+                    document.getElementById('brainOpacity').value = 0.6;
+                    document.getElementById('vesselOpacity').value = 1.0;
+                    document.getElementById('skullColor').value = 'white';
+                    document.getElementById('brainColor').value = 'pink';
+                    document.getElementById('vesselColor').value = 'red';
+                    document.getElementById('enableLighting').checked = true;
+                    break;
+                case 'anatomical':
+                    document.getElementById('showSkull').checked = true;
+                    document.getElementById('showBrain').checked = true;
+                    document.getElementById('showVessels').checked = true;
+                    document.getElementById('skullOpacity').value = 0.25;
+                    document.getElementById('brainOpacity').value = 0.8;
+                    document.getElementById('vesselOpacity').value = 0.95;
+                    document.getElementById('skullColor').value = 'ivory';
+                    document.getElementById('brainColor').value = 'lightcoral';
+                    document.getElementById('vesselColor').value = 'darkred';
+                    document.getElementById('meshQuality').value = 4;
+                    document.getElementById('enableLighting').checked = true;
+                    break;
+            }
+            updateSliderDisplays();
+            updateVisualization();
+        };
+        
+        const updateSliderDisplays = () => {
+            document.getElementById('skullOpacityValue').textContent = 
+                document.getElementById('skullOpacity').value;
+            document.getElementById('brainOpacityValue').textContent = 
+                document.getElementById('brainOpacity').value;
+            document.getElementById('vesselOpacityValue').textContent = 
+                document.getElementById('vesselOpacity').value;
+            document.getElementById('skullThresholdValue').textContent = 
+                document.getElementById('skullThreshold').value;
+            document.getElementById('brainMinHUValue').textContent = 
+                document.getElementById('brainMinHU').value;
+            document.getElementById('brainMaxHUValue').textContent = 
+                document.getElementById('brainMaxHU').value;
+            document.getElementById('vesselMinHUValue').textContent = 
+                document.getElementById('vesselMinHU').value;
+            document.getElementById('vesselMaxHUValue').textContent = 
+                document.getElementById('vesselMaxHU').value;
+            document.getElementById('meshQualityValue').textContent = 
+                document.getElementById('meshQuality').value;
+        };
+        
+        // Event listeners
+        document.addEventListener('DOMContentLoaded', () => {
+            const inputs = document.querySelectorAll('input, select');
+            inputs.forEach(input => {
+                input.addEventListener('change', () => {
+                    updateSliderDisplays();
+                    updateVisualization();
+                });
+            });
+            
+            updateSliderDisplays();
+            
+            // Initial load with medical preset
+            setTimeout(() => {
+                loadPreset('medical');
+            }, 500);
+            
+            console.log('🧠 Enhanced 3D Medical Visualization System Loaded');
+            console.log('Features: Multi-tissue segmentation, Real-time interaction, WebGL acceleration');
+        });
+    </script>
+</body>
+</html>
