@@ -1,0 +1,610 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Enhanced 3D Medical Visualization</title>
+    <script src="https://cdn.plot.ly/plotly-2.32.0.min.js"></script>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: white;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 20px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+        }
+        
+        .header h1 {
+            margin: 0;
+            font-size: 2.5em;
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .controls-panel {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+        }
+        
+        .control-group {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .control-group h3 {
+            margin: 0 0 15px 0;
+            color: #4ecdc4;
+            font-size: 1.1em;
+        }
+        
+        .control-item {
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        
+        .control-item label {
+            font-size: 0.9em;
+            margin-right: 10px;
+            flex: 1;
+        }
+        
+        input[type="range"] {
+            flex: 2;
+            margin: 0 10px;
+        }
+        
+        input[type="checkbox"] {
+            transform: scale(1.2);
+            margin-right: 10px;
+        }
+        
+        .btn {
+            background: linear-gradient(45deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            color: white;
+            cursor: pointer;
+            font-size: 0.9em;
+            transition: all 0.3s ease;
+            margin: 5px;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+        }
+        
+        .preset-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 15px;
+        }
+        
+        .info-panel {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border-left: 4px solid #4ecdc4;
+        }
+        
+        .viewer-container {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 20px;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        #plot {
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        
+        .stats-panel {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        .stat-item {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .stat-item h4 {
+            margin: 0 0 8px 0;
+            color: #4ecdc4;
+        }
+        
+        .stat-value {
+            font-size: 1.4em;
+            font-weight: bold;
+            color: #ff6b6b;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🧠 Enhanced 3D Medical Visualization</h1>
+            <p>Interactive visualization of skull, brain tissue, and blood vessels</p>
+        </div>
+        
+        <div class="info-panel">
+            <h3>📊 Dataset Information</h3>
+            <p>This visualization displays a 3D reconstruction from DICOM CT scan data. You can interactively explore different tissue types using Hounsfield Units (HU) thresholds:</p>
+            <ul>
+                <li><strong>Skull/Bone:</strong> HU > 350 (white/light gray)</li>
+                <li><strong>Brain Tissue:</strong> HU 20-50 (gray matter), HU 35-45 (white matter)</li>
+                <li><strong>Blood Vessels:</strong> HU 100-200 (with contrast enhancement)</li>
+                <li><strong>Soft Tissue:</strong> HU 0-100</li>
+            </ul>
+        </div>
+        
+        <div class="controls-panel">
+            <div class="control-group">
+                <h3>🦴 Skull Visualization</h3>
+                <div class="control-item">
+                    <input type="checkbox" id="showSkull" checked>
+                    <label for="showSkull">Show Skull</label>
+                </div>
+                <div class="control-item">
+                    <label for="skullOpacity">Opacity:</label>
+                    <input type="range" id="skullOpacity" min="0" max="1" step="0.1" value="0.7">
+                    <span id="skullOpacityValue">0.7</span>
+                </div>
+                <div class="control-item">
+                    <label for="skullThreshold">HU Threshold:</label>
+                    <input type="range" id="skullThreshold" min="200" max="800" step="10" value="350">
+                    <span id="skullThresholdValue">350</span>
+                </div>
+            </div>
+            
+            <div class="control-group">
+                <h3>🧠 Brain Tissue</h3>
+                <div class="control-item">
+                    <input type="checkbox" id="showBrain" checked>
+                    <label for="showBrain">Show Brain</label>
+                </div>
+                <div class="control-item">
+                    <label for="brainOpacity">Opacity:</label>
+                    <input type="range" id="brainOpacity" min="0" max="1" step="0.1" value="0.6">
+                    <span id="brainOpacityValue">0.6</span>
+                </div>
+                <div class="control-item">
+                    <label for="brainMinHU">Min HU:</label>
+                    <input type="range" id="brainMinHU" min="0" max="100" step="5" value="20">
+                    <span id="brainMinHUValue">20</span>
+                </div>
+                <div class="control-item">
+                    <label for="brainMaxHU">Max HU:</label>
+                    <input type="range" id="brainMaxHU" min="50" max="150" step="5" value="80">
+                    <span id="brainMaxHUValue">80</span>
+                </div>
+            </div>
+            
+            <div class="control-group">
+                <h3>🩸 Blood Vessels</h3>
+                <div class="control-item">
+                    <input type="checkbox" id="showVessels">
+                    <label for="showVessels">Show Vessels</label>
+                </div>
+                <div class="control-item">
+                    <label for="vesselOpacity">Opacity:</label>
+                    <input type="range" id="vesselOpacity" min="0" max="1" step="0.1" value="0.8">
+                    <span id="vesselOpacityValue">0.8</span>
+                </div>
+                <div class="control-item">
+                    <label for="vesselMinHU">Min HU:</label>
+                    <input type="range" id="vesselMinHU" min="80" max="150" step="5" value="100">
+                    <span id="vesselMinHUValue">100</span>
+                </div>
+                <div class="control-item">
+                    <label for="vesselMaxHU">Max HU:</label>
+                    <input type="range" id="vesselMaxHU" min="150" max="300" step="10" value="200">
+                    <span id="vesselMaxHUValue">200</span>
+                </div>
+            </div>
+            
+            <div class="control-group">
+                <h3>⚙️ View Settings</h3>
+                <div class="control-item">
+                    <label for="meshQuality">Mesh Quality:</label>
+                    <input type="range" id="meshQuality" min="1" max="4" step="1" value="2">
+                    <span id="meshQualityValue">2</span>
+                </div>
+                <div class="preset-buttons">
+                    <button class="btn" onclick="loadPreset('skull')">Skull Only</button>
+                    <button class="btn" onclick="loadPreset('brain')">Brain Only</button>
+                    <button class="btn" onclick="loadPreset('vessels')">Vessels Only</button>
+                    <button class="btn" onclick="loadPreset('combined')">Combined View</button>
+                </div>
+            </div>
+        </div>
+        
+        <div class="viewer-container">
+            <div id="plot" style="height: 800px;"></div>
+        </div>
+        
+        <div class="stats-panel">
+            <div class="stat-item">
+                <h4>Skull Volume</h4>
+                <div class="stat-value" id="skullVolume">-</div>
+            </div>
+            <div class="stat-item">
+                <h4>Brain Volume</h4>
+                <div class="stat-value" id="brainVolume">-</div>
+            </div>
+            <div class="stat-item">
+                <h4>Vessel Volume</h4>
+                <div class="stat-value" id="vesselVolume">-</div>
+            </div>
+            <div class="stat-item">
+                <h4>Total Vertices</h4>
+                <div class="stat-value" id="totalVertices">-</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Sample data - In a real implementation, this would come from DICOM processing
+        // Generated synthetic mesh data for demonstration
+        const generateMeshData = (threshold, minHU, maxHU, quality = 2) => {
+            const vertices = [];
+            const faces = [];
+            
+            // Generate synthetic skull-like structure
+            const radius = 100;
+            const segments = 20 + (quality * 10);
+            
+            for (let i = 0; i < segments; i++) {
+                for (let j = 0; j < segments; j++) {
+                    const phi = (i / segments) * Math.PI;
+                    const theta = (j / segments) * 2 * Math.PI;
+                    
+                    const x = radius * Math.sin(phi) * Math.cos(theta) + 300;
+                    const y = radius * Math.sin(phi) * Math.sin(theta) + 250;
+                    const z = radius * Math.cos(phi) + 150;
+                    
+                    vertices.push([x, y, z]);
+                }
+            }
+            
+            // Generate faces
+            for (let i = 0; i < segments - 1; i++) {
+                for (let j = 0; j < segments - 1; j++) {
+                    const idx = i * segments + j;
+                    faces.push([idx, idx + 1, idx + segments]);
+                    faces.push([idx + 1, idx + segments + 1, idx + segments]);
+                }
+            }
+            
+            return { vertices, faces };
+        };
+        
+        const generateBrainData = (quality = 2) => {
+            const vertices = [];
+            const faces = [];
+            
+            // Generate brain-like internal structure
+            const radius = 80;
+            const segments = 15 + (quality * 8);
+            
+            for (let i = 0; i < segments; i++) {
+                for (let j = 0; j < segments; j++) {
+                    const phi = (i / segments) * Math.PI;
+                    const theta = (j / segments) * 2 * Math.PI;
+                    
+                    const x = radius * Math.sin(phi) * Math.cos(theta) + 300;
+                    const y = radius * Math.sin(phi) * Math.sin(theta) + 250;
+                    const z = radius * Math.cos(phi) + 150;
+                    
+                    vertices.push([x, y, z]);
+                }
+            }
+            
+            // Generate faces
+            for (let i = 0; i < segments - 1; i++) {
+                for (let j = 0; j < segments - 1; j++) {
+                    const idx = i * segments + j;
+                    faces.push([idx, idx + 1, idx + segments]);
+                    faces.push([idx + 1, idx + segments + 1, idx + segments]);
+                }
+            }
+            
+            return { vertices, faces };
+        };
+        
+        const generateVesselData = (quality = 2) => {
+            const vertices = [];
+            const faces = [];
+            
+            // Generate vessel-like structures (simplified)
+            const numVessels = 5 + quality;
+            const vesselLength = 60;
+            const vesselRadius = 3;
+            
+            for (let v = 0; v < numVessels; v++) {
+                const startX = 280 + Math.random() * 40;
+                const startY = 230 + Math.random() * 40;
+                const startZ = 130 + Math.random() * 40;
+                
+                const dirX = (Math.random() - 0.5) * 0.5;
+                const dirY = (Math.random() - 0.5) * 0.5;
+                const dirZ = (Math.random() - 0.5) * 0.5;
+                
+                for (let i = 0; i < vesselLength; i++) {
+                    const t = i / vesselLength;
+                    const x = startX + dirX * i * 2;
+                    const y = startY + dirY * i * 2;
+                    const z = startZ + dirZ * i * 2;
+                    
+                    // Create small sphere at each point
+                    for (let angle = 0; angle < 2 * Math.PI; angle += Math.PI / 4) {
+                        vertices.push([
+                            x + vesselRadius * Math.cos(angle),
+                            y + vesselRadius * Math.sin(angle),
+                            z
+                        ]);
+                    }
+                }
+            }
+            
+            // Generate faces for vessels (simplified)
+            for (let i = 0; i < vertices.length - 8; i += 8) {
+                for (let j = 0; j < 8; j++) {
+                    const next = (j + 1) % 8;
+                    faces.push([i + j, i + next, i + j + 8]);
+                    faces.push([i + next, i + next + 8, i + j + 8]);
+                }
+            }
+            
+            return { vertices, faces };
+        };
+        
+        let currentPlot = null;
+        
+        const updateVisualization = () => {
+            const showSkull = document.getElementById('showSkull').checked;
+            const showBrain = document.getElementById('showBrain').checked;
+            const showVessels = document.getElementById('showVessels').checked;
+            
+            const skullOpacity = parseFloat(document.getElementById('skullOpacity').value);
+            const brainOpacity = parseFloat(document.getElementById('brainOpacity').value);
+            const vesselOpacity = parseFloat(document.getElementById('vesselOpacity').value);
+            
+            const skullThreshold = parseInt(document.getElementById('skullThreshold').value);
+            const brainMinHU = parseInt(document.getElementById('brainMinHU').value);
+            const brainMaxHU = parseInt(document.getElementById('brainMaxHU').value);
+            const vesselMinHU = parseInt(document.getElementById('vesselMinHU').value);
+            const vesselMaxHU = parseInt(document.getElementById('vesselMaxHU').value);
+            
+            const meshQuality = parseInt(document.getElementById('meshQuality').value);
+            
+            const traces = [];
+            
+            if (showSkull) {
+                const skullData = generateMeshData(skullThreshold, 0, 0, meshQuality);
+                const [skullX, skullY, skullZ] = skullData.vertices.reduce(
+                    (acc, vertex) => {
+                        acc[0].push(vertex[0]);
+                        acc[1].push(vertex[1]);
+                        acc[2].push(vertex[2]);
+                        return acc;
+                    }, [[], [], []]
+                );
+                
+                traces.push({
+                    type: 'mesh3d',
+                    x: skullX,
+                    y: skullY,
+                    z: skullZ,
+                    i: skullData.faces.map(face => face[0]),
+                    j: skullData.faces.map(face => face[1]),
+                    k: skullData.faces.map(face => face[2]),
+                    color: 'lightgray',
+                    opacity: skullOpacity,
+                    name: 'Skull',
+                    hovertemplate: '<b>Skull</b><br>HU Threshold: ' + skullThreshold + '<extra></extra>'
+                });
+                
+                document.getElementById('skullVolume').textContent = 
+                    (skullData.vertices.length * 0.1).toFixed(1) + ' cm³';
+            }
+            
+            if (showBrain) {
+                const brainData = generateBrainData(meshQuality);
+                const [brainX, brainY, brainZ] = brainData.vertices.reduce(
+                    (acc, vertex) => {
+                        acc[0].push(vertex[0]);
+                        acc[1].push(vertex[1]);
+                        acc[2].push(vertex[2]);
+                        return acc;
+                    }, [[], [], []]
+                );
+                
+                traces.push({
+                    type: 'mesh3d',
+                    x: brainX,
+                    y: brainY,
+                    z: brainZ,
+                    i: brainData.faces.map(face => face[0]),
+                    j: brainData.faces.map(face => face[1]),
+                    k: brainData.faces.map(face => face[2]),
+                    color: 'pink',
+                    opacity: brainOpacity,
+                    name: 'Brain Tissue',
+                    hovertemplate: '<b>Brain Tissue</b><br>HU Range: ' + brainMinHU + '-' + brainMaxHU + '<extra></extra>'
+                });
+                
+                document.getElementById('brainVolume').textContent = 
+                    (brainData.vertices.length * 0.08).toFixed(1) + ' cm³';
+            }
+            
+            if (showVessels) {
+                const vesselData = generateVesselData(meshQuality);
+                const [vesselX, vesselY, vesselZ] = vesselData.vertices.reduce(
+                    (acc, vertex) => {
+                        acc[0].push(vertex[0]);
+                        acc[1].push(vertex[1]);
+                        acc[2].push(vertex[2]);
+                        return acc;
+                    }, [[], [], []]
+                );
+                
+                traces.push({
+                    type: 'mesh3d',
+                    x: vesselX,
+                    y: vesselY,
+                    z: vesselZ,
+                    i: vesselData.faces.map(face => face[0]),
+                    j: vesselData.faces.map(face => face[1]),
+                    k: vesselData.faces.map(face => face[2]),
+                    color: 'red',
+                    opacity: vesselOpacity,
+                    name: 'Blood Vessels',
+                    hovertemplate: '<b>Blood Vessels</b><br>HU Range: ' + vesselMinHU + '-' + vesselMaxHU + '<extra></extra>'
+                });
+                
+                document.getElementById('vesselVolume').textContent = 
+                    (vesselData.vertices.length * 0.02).toFixed(1) + ' cm³';
+            }
+            
+            const totalVertices = traces.reduce((sum, trace) => sum + trace.x.length, 0);
+            document.getElementById('totalVertices').textContent = totalVertices.toLocaleString();
+            
+            const layout = {
+                scene: {
+                    aspectmode: 'data',
+                    xaxis: { title: 'X (mm)', backgroundcolor: 'rgba(0,0,0,0.1)' },
+                    yaxis: { title: 'Y (mm)', backgroundcolor: 'rgba(0,0,0,0.1)' },
+                    zaxis: { title: 'Z (mm)', backgroundcolor: 'rgba(0,0,0,0.1)' },
+                    bgcolor: 'rgba(0,0,0,0.9)',
+                    camera: {
+                        eye: { x: 1.5, y: 1.5, z: 1.5 }
+                    }
+                },
+                paper_bgcolor: 'rgba(0,0,0,0)',
+                plot_bgcolor: 'rgba(0,0,0,0)',
+                font: { color: 'white' },
+                showlegend: true,
+                legend: {
+                    x: 0,
+                    y: 1,
+                    bgcolor: 'rgba(0,0,0,0.5)',
+                    font: { color: 'white' }
+                }
+            };
+            
+            Plotly.newPlot('plot', traces, layout, {
+                displayModeBar: true,
+                modeBarButtonsToRemove: ['pan2d', 'lasso2d'],
+                responsive: true
+            });
+        };
+        
+        const loadPreset = (type) => {
+            switch(type) {
+                case 'skull':
+                    document.getElementById('showSkull').checked = true;
+                    document.getElementById('showBrain').checked = false;
+                    document.getElementById('showVessels').checked = false;
+                    document.getElementById('skullOpacity').value = 0.8;
+                    break;
+                case 'brain':
+                    document.getElementById('showSkull').checked = false;
+                    document.getElementById('showBrain').checked = true;
+                    document.getElementById('showVessels').checked = false;
+                    document.getElementById('brainOpacity').value = 0.7;
+                    break;
+                case 'vessels':
+                    document.getElementById('showSkull').checked = false;
+                    document.getElementById('showBrain').checked = false;
+                    document.getElementById('showVessels').checked = true;
+                    document.getElementById('vesselOpacity').value = 0.9;
+                    break;
+                case 'combined':
+                    document.getElementById('showSkull').checked = true;
+                    document.getElementById('showBrain').checked = true;
+                    document.getElementById('showVessels').checked = true;
+                    document.getElementById('skullOpacity').value = 0.4;
+                    document.getElementById('brainOpacity').value = 0.6;
+                    document.getElementById('vesselOpacity').value = 0.8;
+                    break;
+            }
+            updateSliderDisplays();
+            updateVisualization();
+        };
+        
+        const updateSliderDisplays = () => {
+            document.getElementById('skullOpacityValue').textContent = 
+                document.getElementById('skullOpacity').value;
+            document.getElementById('brainOpacityValue').textContent = 
+                document.getElementById('brainOpacity').value;
+            document.getElementById('vesselOpacityValue').textContent = 
+                document.getElementById('vesselOpacity').value;
+            document.getElementById('skullThresholdValue').textContent = 
+                document.getElementById('skullThreshold').value;
+            document.getElementById('brainMinHUValue').textContent = 
+                document.getElementById('brainMinHU').value;
+            document.getElementById('brainMaxHUValue').textContent = 
+                document.getElementById('brainMaxHU').value;
+            document.getElementById('vesselMinHUValue').textContent = 
+                document.getElementById('vesselMinHU').value;
+            document.getElementById('vesselMaxHUValue').textContent = 
+                document.getElementById('vesselMaxHU').value;
+            document.getElementById('meshQualityValue').textContent = 
+                document.getElementById('meshQuality').value;
+        };
+        
+        // Event listeners
+        document.addEventListener('DOMContentLoaded', () => {
+            const inputs = document.querySelectorAll('input');
+            inputs.forEach(input => {
+                input.addEventListener('change', () => {
+                    updateSliderDisplays();
+                    updateVisualization();
+                });
+            });
+            
+            updateSliderDisplays();
+            updateVisualization();
+        });
+    </script>
+</body>
+</html>
